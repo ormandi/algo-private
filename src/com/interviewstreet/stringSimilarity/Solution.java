@@ -19,7 +19,6 @@ public class Solution {
         // process text
         final int length = text.length();
         
-        
         int[] z = new int[length];  // z-values
         z[0] = length;
         int l = 0, r = 0;
@@ -27,7 +26,7 @@ public class Solution {
         
         // computing z-values and their sum
         for (int i = 1; i < length; i ++) {
-          if (i == 1 || r < i) {
+          if (r < i) {
             // computing z[i] applying naive comparison
             for (int j = 0; j < length - i; j ++) {
               if (text.charAt(j) == text.charAt(i + j)) {
@@ -40,15 +39,15 @@ public class Solution {
             l = i;
           } else {
             // compute z[i] based on the previously computed z-values
-            int pI = i - l;        // "parent" of i
+            int k = i - l;         // "parent" of i
             int b = r - i + 1;     // length of t[i..r]=t[i'..r-l]
-            int c = z[pI];         // length of t[pI..z[pI]]
+            int c = z[k];          // length of t[k..k+z[k]-1]=t[0..z[k]-1]
             z[i] = c;
             
             if (b <= c) {
               z[i] = b;
               for (int j = 1; j < length - r; j++) {
-                if (text.charAt(r+j) == text.charAt(r-l+j)) {
+                if (text.charAt(r+j) == text.charAt(b-1+j)) {
                   z[i] ++;
                 } else {
                   l = i;
@@ -62,7 +61,6 @@ public class Solution {
           // sum up z-values
           sum += z[i];
         }
-        
         
         // show output
         if (++ testID < N) {
