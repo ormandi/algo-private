@@ -19,47 +19,50 @@ public class Solution {
         // process text
         final int length = text.length();
         
-        // s[i] stores the length of the proper substring ended in position i which matches the prefix of the text
-        int[] s = new int[length];  // weak KMP failure function
-        s[0] = 0;
-        int[] ss = new int[length]; // strong KMP failure function i.e. it's also required t[i+1] != t[s[i]]+1
-        ss[0] = 0;
+        
         int[] z = new int[length];  // z-values
         z[0] = length;
+        int l = 0, r = 0;
+        long sum = length;
         
-        // computing failure function of weak and strong KMP, then the corresponding z-values
+        // computing z-values and their sum
         for (int i = 1; i < length; i ++) {
-          // weak KMP computation
-          int x = i - 1;
-          while (0 < x && text.charAt(s[x]) != text.charAt(i)) {
-            x = s[x] - 1;
+          if (i == 1 || r < i) {
+            // computing z[i] applying naive comparison
+            for (int j = 0; j < length - i; j ++) {
+              if (text.charAt(j) == text.charAt(i + j)) {
+                z[i] ++;
+              } else {
+                break;
+              }
+            }
+            r = i + z[i] - 1;
+            l = i;
+          } else {
+            // compute z[i] based on the previously computed z-values
+            int pI = i - l;        // "parent" of i
+            int b = r - i + 1;     // length of t[i..r]=t[i'..r-l]
+            int c = z[pI];         // length of t[pI..z[pI]]
+            z[i] = c;
+            
+            if (b <= c) {
+              z[i] = b;
+              for (int j = 1; j < length - r; j++) {
+                if (text.charAt(r+j) == text.charAt(r-l+j)) {
+                  z[i] ++;
+                } else {
+                  l = i;
+                  r = r + j - 1;
+                  break;
+                }
+              }
+            }
           }
-          s[i] = ( 0 <= x && text.charAt(s[x]) == text.charAt(i) ) ? s[x] + 1 : 0;
           
-          // strong KMP computation
-          x = i;
-          while (0 < x && i+1 < length && text.charAt(s[x]) == text.charAt(i+1)) {
-            x = s[x] - 1;
-          }
-          ss[i] = (0 <= x && (length-1 == i || text.charAt(s[x]) != text.charAt(i+1))) ? s[x]: 0;
-          
-          // compute z-values
-          final int j = i - ss[i] + 1;
-          z[j] = ss[i];
-          
-          // DEBUG:
-          System.out.println("s[" + i + "]=" + s[i] + "\tss[" + i + "] = " + ss[i] + "\tz[" + j + "]=" + z[j]);
-        }
-        
-        // compute final solution
-        long sum = 0;
-        for (int i = 0; i < length; i++) {
           // sum up z-values
           sum += z[i];
-          
-          // DEBUG
-          System.out.println("z[" + i + "]=" + z[i]);
         }
+        
         
         // show output
         if (++ testID < N) {
