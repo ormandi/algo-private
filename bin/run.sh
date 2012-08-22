@@ -23,7 +23,7 @@ if [ $# -eq 1 ]; then
           echo "[FAILED]"
           tput sgr0 2>/dev/null
           echo "Output diff: "
-          cat ${expected_output}
+          cat ${expected_output}.diff
         else
           # passed
           tput setaf 4 2>/dev/null
