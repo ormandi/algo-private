@@ -80,8 +80,6 @@ public class Solution {
         dlm1[k][k][kk] = 1;
         c[1][k] = (isPrime[k] && isPrime[kk]) ? 1 : 0;
       }
-      printdl(dlm1, 1);
-      
       
       // dynamic computation of d[l] tables where 2 <= l
       for (int l = 2; l < NUMBER_LENGTH; l++) {
@@ -90,6 +88,7 @@ public class Solution {
         // for each digit k
         for (int k = 0; k < NUMBER_OF_DIGITS; k ++) {
           kk = k*k; // square of k
+          dl[k][k][kk] = (k > 0) ? 1 : 0; /* k0...0 */
           // computing d[l][k] and c[l][k]
           for (int s = 0; s < DIGIT_SUM_SIZE; s ++) {
             for (int q = 0; q < DIGIT_SQUARE_SUM_SIZE; q ++) {
@@ -104,7 +103,7 @@ public class Solution {
           }
         }
         
-        if (l == 1 || l==2) {
+        if (l==2) {
           printdl(dl, l);
         }
         
