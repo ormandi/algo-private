@@ -67,7 +67,7 @@ public class Solution {
       //                   the sum of its digits is s,
       //                   the sum of square of its digits is q
       // DP relation: d[l][k][s][q] = sum of each 0<=j<=9: d[l-1][j][s-k][q-k*k] 
-      long[][][] dl = null;   // d[l]
+      long[][][] dl = null;   // d[l]   
       long[][][] dlm1 = new long[NUMBER_OF_DIGITS][DIGIT_SUM_SIZE][DIGIT_SQUARE_SUM_SIZE]; // d[l-1]
       // c[l][k] = number of lucky number in length l with digit k at position l
       // c[l][k] = sum of each s,q: (isPrime[s] && isPrime[q]) ? d[l][k][s][q] : 0
@@ -81,6 +81,8 @@ public class Solution {
         c[1][k] = (isPrime[k] && isPrime[kk]) ? 1 : 0;
       }
       
+      //printdl(dlm1, 1);
+      
       // dynamic computation of d[l] tables where 2 <= l
       for (int l = 2; l < NUMBER_LENGTH; l++) {
         dl = new long[NUMBER_OF_DIGITS][DIGIT_SUM_SIZE][DIGIT_SQUARE_SUM_SIZE];
@@ -88,7 +90,7 @@ public class Solution {
         // for each digit k
         for (int k = 0; k < NUMBER_OF_DIGITS; k ++) {
           kk = k*k; // square of k
-          dl[k][k][kk] = (k > 0) ? 1 : 0; /* k0...0 */
+          dl[k][k][kk] += 1;
           // computing d[l][k] and c[l][k]
           for (int s = 0; s < DIGIT_SUM_SIZE; s ++) {
             for (int q = 0; q < DIGIT_SQUARE_SUM_SIZE; q ++) {
@@ -103,13 +105,15 @@ public class Solution {
           }
         }
         
-        if (l==2) {
+        if (l==4) {
           printdl(dl, l);
         }
         
         // storing d[l] as d[l-1]
         dlm1 = dl;
       }
+      
+      
           
       // open stdin as reader and create and instance of current class for instantiating subproblems
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
