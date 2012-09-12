@@ -5,15 +5,26 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 
 public class Solution {
+  public static final int PROBLEM_SIZE = 18;
+  public static final int NUMBER_LENGTH = PROBLEM_SIZE + 2;
+  public static final int NUMBER_OF_DIGITS = 10;
+  public static final int DIGIT_SUM_SIZE = PROBLEM_SIZE * 9 + 1;
+  public static final int DIGIT_SQUARE_SUM_SIZE = PROBLEM_SIZE * 81 + 1;
   
-  private static void printdl(long[][] dl, int l) {
+  // initialization for sieving
+  public static final int SIEVE_SIZE = DIGIT_SQUARE_SUM_SIZE;
+  public static final int SQRT_SIEVE_SIZE = (int) Math.sqrt(SIEVE_SIZE);
+  
+  private static void printdl(long[][][] dl, int l) {
     long digitSum = 0, digitSquareSum = 0;
-    for (int s = 0; s < dl.length; s ++) {
-      for (int q = 0; q < dl[s].length; q ++) {
-        if (dl[s][q] != 0) {
-          System.err.println("d["+l+"]["+s+"]["+q+"] = " + dl[s][q]);
-          digitSum += dl[s][q] * s;
-          digitSquareSum += dl[s][q] * q;
+    for (int k = 0; k < dl.length; k ++) {
+      for (int s = 0; s < dl[k].length; s ++) {
+        for (int q = 0; q < dl[k][s].length; q ++) {
+          if (dl[k][s][q] != 0) {
+            System.err.println("d["+l+"]["+k+"]["+s+"]["+q+"] = " + dl[k][s][q]);
+            digitSum += dl[k][s][q] * s;
+            digitSquareSum += dl[k][s][q] * q;
+          }
         }
       }
     }
@@ -22,18 +33,37 @@ public class Solution {
     System.err.println("----------");
   }
   
-  private static long numberOfLuckyNumbers(long num, long[][] c) {
+  private static long numberOfLuckyNumbers(long num, long[][][][] d, boolean[] isPrime) {
     long numberOfLuckyNumbers = 0;
     
-    long prev = 0, cur = 0, prevDiv = 1, div = 10;
-    int k = 0, l=0;
-    while (cur < num) {
-      cur = num % div;
-      k = (int) ((cur - prev) / prevDiv);
-      numberOfLuckyNumbers += c[++ l][k];
-      prev = cur;
-      prevDiv = div;
-      div *= 10;
+    int mod, k = 0, l = 0;
+    int[] c = new int[NUMBER_LENGTH];
+    while ((mod = (int)(num % 10)) > 0) {
+      c[l ++] = mod;
+      num /= 10;
+    }
+    
+    int kk = 0;
+    int digitSumPrev = 0, digitSquareSumPrev = 0; // accumulators
+    for (; 0 < l; l --) {
+      k = c[l-1]; kk = k*k;
+      
+      System.err.println(k);
+      
+      for (int j = 0; j < k; j++) {
+        int jj = j*j;
+        for (int s = 0; s < DIGIT_SUM_SIZE - digitSumPrev - j; s ++) { // better bound
+          for (int q = 0; q < DIGIT_SQUARE_SUM_SIZE - digitSquareSumPrev - jj; q ++) {
+            if (0 < d[l][j][s + j + digitSumPrev][q + jj + digitSquareSumPrev] && isPrime[s + j + digitSquareSumPrev] && isPrime[q + jj + digitSquareSumPrev]) {
+              System.err.println(l + "\t" + j + "\t" + (s + j + digitSumPrev) + "\t" + (q + jj + digitSquareSumPrev) + "\t" + d[l][j][s + j + digitSumPrev][q + jj + digitSquareSumPrev] );
+              numberOfLuckyNumbers += d[l][j][s + j + digitSumPrev][q + jj + digitSquareSumPrev];
+            }
+          }
+        }        
+      }
+      
+      digitSumPrev += k;
+      digitSquareSumPrev += kk;
     }
     
     return numberOfLuckyNumbers;
@@ -41,15 +71,6 @@ public class Solution {
   
   public static void main(String[] args) {
     try {
-      final int PROBLEM_SIZE = 18;
-      final int NUMBER_LENGTH = PROBLEM_SIZE + 2;
-      final int NUMBER_OF_DIGITS = 10;
-      final int DIGIT_SUM_SIZE = PROBLEM_SIZE * 9 + 1;
-      final int DIGIT_SQUARE_SUM_SIZE = PROBLEM_SIZE * 81 + 1;
-      
-      // initialization for sieving
-      final int SIEVE_SIZE = DIGIT_SQUARE_SUM_SIZE;
-      final int SQRT_SIEVE_SIZE = (int) Math.sqrt(SIEVE_SIZE);
       final boolean isPrime[] = new boolean[SIEVE_SIZE];
       Arrays.fill(isPrime, true);
       isPrime[0] = isPrime[1] = false;
@@ -64,45 +85,37 @@ public class Solution {
       }
       
       // initialization for DP
-      // d[l][s][q] = number of numbers which
+      // d[l][k][s][q] = number of numbers which
       //                   has a length of l,
+      //                   the digit on position l is k,
       //                   the sum of its digits is s,
       //                   the sum of square of its digits is q
-      // DP relation: d[l][s][q] = sum of each 0<=j<=9: d[l-1][s-j][q-j*j] 
-      long[][] dl = null;   // d[l]   
-      long[][] dlm1 = new long[DIGIT_SUM_SIZE][DIGIT_SQUARE_SUM_SIZE]; // d[l-1]
-      // lucky[l][k] = number of lucky numbers which are less than or equal to k*10^(l-1)
-      // i.e. number
-      long[][] lucky = new long[NUMBER_LENGTH][NUMBER_OF_DIGITS];
+      // DP relation: d[l][k][s][q] = sum of each 0<=j<=9: d[l-1][s-j][q-j*j] 
+      long[][][][] d = new long[NUMBER_LENGTH][NUMBER_OF_DIGITS][DIGIT_SUM_SIZE][DIGIT_SQUARE_SUM_SIZE];
       
       // computing the base case i.e. when l is equal to 1 into table dlm1
       int jj = 0;
       for (int j = 0; j < NUMBER_OF_DIGITS; j ++) {
         jj = j*j;
-        dlm1[j][jj] = 1;
+        d[1][j][j][jj] = 1;
       }
       
       // dynamic computation of d[l] tables where 2 <= l
       for (int l = 2; l < NUMBER_LENGTH; l++) {
-        dl = new long[DIGIT_SUM_SIZE][DIGIT_SQUARE_SUM_SIZE];
-        for (int s = 0; s < DIGIT_SUM_SIZE; s ++) {
-          for (int q = 0; q < DIGIT_SQUARE_SUM_SIZE; q ++) {
-            // summing through each possible extension digit j
-            for (int j = 0; j < NUMBER_OF_DIGITS; j ++) {
-              jj = j*j;
-              dl[s][q] += (0 <= s-j && 0 <= q-jj) ? dlm1[s-j][q-jj] : 0;
+        // summing through each possible extension digit j
+        for (int j = 0; j < NUMBER_OF_DIGITS; j ++) {
+          jj = j*j;
+          for (int s = 0; s < DIGIT_SUM_SIZE; s ++) {
+            for (int q = 0; q < DIGIT_SQUARE_SUM_SIZE; q ++) {
+              for (int k = 0; k < NUMBER_OF_DIGITS; k++) {
+                d[l][j][s][q] += (0 <= s-j && 0 <= q-jj) ? d[l-1][k][s-j][q-jj] : 0;
+              }
             }
           }
         }
-        
-        if (l == 4) {
-          printdl(dl, l);
-        }
-        
-        // storing d[l] as d[l-1]
-        dlm1 = dl;
       }
       
+      System.err.println(Solution.numberOfLuckyNumbers(25, d, isPrime));
           
       // open stdin as reader and create and instance of current class for instantiating subproblems
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
