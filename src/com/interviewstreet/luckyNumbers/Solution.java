@@ -34,11 +34,16 @@ public class Solution {
   }
   
   private static long numberOfLuckyNumbers(long num, long[][][][] d, boolean[] isPrime) {
+    if (num < 10) {
+      return 0;
+    }
+    
     long numberOfLuckyNumbers = 0;
     
     int mod, k = 0, l = 0;
     int[] c = new int[NUMBER_LENGTH];
-    while ((mod = (int)(num % 10)) > 0) {
+    while (num / 10 != 0 || num % 10 != 0) {
+      mod = (int)(num % 10);
       c[l ++] = mod;
       num /= 10;
     }
@@ -48,15 +53,16 @@ public class Solution {
     for (; 0 < l; l --) {
       k = c[l-1]; kk = k*k;
       
-      System.err.println(k);
+      System.err.println("k=" + k);
       
       for (int j = 0; j < k; j++) {
-        int jj = j*j;
-        for (int s = 0; s < DIGIT_SUM_SIZE - digitSumPrev - j; s ++) { // better bound
-          for (int q = 0; q < DIGIT_SQUARE_SUM_SIZE - digitSquareSumPrev - jj; q ++) {
-            if (0 < d[l][j][s + j + digitSumPrev][q + jj + digitSquareSumPrev] && isPrime[s + j + digitSquareSumPrev] && isPrime[q + jj + digitSquareSumPrev]) {
-              System.err.println(l + "\t" + j + "\t" + (s + j + digitSumPrev) + "\t" + (q + jj + digitSquareSumPrev) + "\t" + d[l][j][s + j + digitSumPrev][q + jj + digitSquareSumPrev] );
-              numberOfLuckyNumbers += d[l][j][s + j + digitSumPrev][q + jj + digitSquareSumPrev];
+        for (int s = 0; s <= l * 9; s ++) {
+          for (int q = 0; q <= l * 81; q ++) {
+            if (0 < d[l][j][s][q] && isPrime[s + digitSumPrev] && isPrime[q + digitSquareSumPrev]) {
+              
+              System.err.println(l + "\t" + j + "\t" + (s + digitSumPrev) + "\t" + (q + digitSquareSumPrev) + "\t" + d[l][j][s][q] );
+              
+              numberOfLuckyNumbers += d[l][j][s][q];
             }
           }
         }        
@@ -115,7 +121,7 @@ public class Solution {
         }
       }
       
-      System.err.println(Solution.numberOfLuckyNumbers(25, d, isPrime));
+      //System.err.println(Solution.numberOfLuckyNumbers(25, d, isPrime));
           
       // open stdin as reader and create and instance of current class for instantiating subproblems
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -133,7 +139,7 @@ public class Solution {
         final long B = Long.parseLong(splited[1]);
         
         // check number between A and B
-        long numberOfLuckyNumbers = 0;//numberOfLuckyNumbers(B, c) - numberOfLuckyNumbers(A-1, c);
+        long numberOfLuckyNumbers = numberOfLuckyNumbers(B, d, isPrime) - numberOfLuckyNumbers(A-1, d, isPrime);
         
         // show output
         if (i < N-1) {
