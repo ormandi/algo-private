@@ -50,6 +50,7 @@ public class Solution {
     
     int kk = 0;
     int digitSumPrev = 0, digitSquareSumPrev = 0; // accumulators
+    int origLength = l, firstDigit = c[origLength - 1];
     for (; 0 < l; l --) {
       k = c[l-1]; kk = k*k;
       
@@ -70,6 +71,9 @@ public class Solution {
       
       digitSumPrev += k;
       digitSquareSumPrev += kk;
+    }
+    if (isPrime[digitSumPrev] && isPrime[digitSquareSumPrev]) {
+      numberOfLuckyNumbers ++;
     }
     
     return numberOfLuckyNumbers;
