@@ -14,26 +14,8 @@ public class Solution {
   // initialization for sieving
   public static final int SIEVE_SIZE = DIGIT_SQUARE_SUM_SIZE;
   public static final int SQRT_SIEVE_SIZE = (int) Math.sqrt(SIEVE_SIZE);
-  
-  private static void printdl(long[][][] dl, int l) {
-    long digitSum = 0, digitSquareSum = 0;
-    for (int k = 0; k < dl.length; k ++) {
-      for (int s = 0; s < dl[k].length; s ++) {
-        for (int q = 0; q < dl[k][s].length; q ++) {
-          if (dl[k][s][q] != 0) {
-            System.err.println("d["+l+"]["+k+"]["+s+"]["+q+"] = " + dl[k][s][q]);
-            digitSum += dl[k][s][q] * s;
-            digitSquareSum += dl[k][s][q] * q;
-          }
-        }
-      }
-    }
-    System.err.println("DigitSum = " + digitSum);
-    System.err.println("DigitSquareSum = " + digitSquareSum);
-    System.err.println("----------");
-  }
-  
-  private static long numberOfLuckyNumbers(long num, long[][][][] d, boolean[] isPrime) {
+   
+  private static long numberOfLuckyNumbers(long num, int[][][][] d, boolean[] isPrime) {
     if (num < 10) {
       return 0;
     }
@@ -53,16 +35,10 @@ public class Solution {
     int origLength = l, firstDigit = c[origLength - 1];
     for (; 0 < l; l --) {
       k = c[l-1]; kk = k*k;
-      
-      System.err.println("k=" + k);
-      
       for (int j = 0; j < k; j++) {
         for (int s = 0; s <= l * 9; s ++) {
           for (int q = 0; q <= l * 81; q ++) {
             if (0 < d[l][j][s][q] && isPrime[s + digitSumPrev] && isPrime[q + digitSquareSumPrev]) {
-              
-              System.err.println(l + "\t" + j + "\t" + (s + digitSumPrev) + "\t" + (q + digitSquareSumPrev) + "\t" + d[l][j][s][q] );
-              
               numberOfLuckyNumbers += d[l][j][s][q];
             }
           }
@@ -101,7 +77,7 @@ public class Solution {
       //                   the sum of its digits is s,
       //                   the sum of square of its digits is q
       // DP relation: d[l][k][s][q] = sum of each 0<=j<=9: d[l-1][s-j][q-j*j] 
-      long[][][][] d = new long[NUMBER_LENGTH][NUMBER_OF_DIGITS][DIGIT_SUM_SIZE][DIGIT_SQUARE_SUM_SIZE];
+      final int[][][][] d = new int[NUMBER_LENGTH][NUMBER_OF_DIGITS][DIGIT_SUM_SIZE][DIGIT_SQUARE_SUM_SIZE];
       
       // computing the base case i.e. when l is equal to 1 into table dlm1
       int jj = 0;
@@ -156,7 +132,8 @@ public class Solution {
       // close input
       in.close();
     } catch (Exception e) {
-      throw new RuntimeException(e); // dirty exception handling
+      e.printStackTrace();
+      //throw new RuntimeException(e); // dirty exception handling
     }
   }
 }
