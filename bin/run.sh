@@ -7,7 +7,8 @@ if [ $# -eq 1 ]; then
   export project_dir=`dirname $0`"/../"
   export data_dir=${project_dir}/bin/${problem}
   export class_path="${project_dir}/build/"
-  export class=`find ${project_dir}/src/ -type d -name "*${problem}*" | awk 'BEGIN{FS="/"}{for (i=1;i<=NF;i++) {if (c) {class=class $i "."} if ($i == "src") {c=1}}}END{print class "Solution"}'`
+  export class=`find ${project_dir}/src -type d -name "*${problem}*" | awk 'BEGIN{FS="/"}{for (i=1;i<=NF;i++) {if (c) {class=class $i "."} if ($i == "src") {c=1}}}END{print class "Solution"}'`
+  echo $class
 
   if [ -d ${data_dir} ]; then
     for input in `ls ${data_dir}/input*`; do
