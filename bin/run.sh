@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export mem="256M"
+export mem="512M"
 
 if [ $# -eq 1 ]; then
   export problem="$1"
